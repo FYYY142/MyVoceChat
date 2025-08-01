@@ -11,7 +11,9 @@ class _MineViewState extends State<MineView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF1F2F6),
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('Mine'),
       ),
       body: const Center(

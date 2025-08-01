@@ -51,6 +51,7 @@ class _TheHomeViewState extends State<TheHomeView>
         child: TabBar(
           controller: _tabController,
           indicator: const BoxDecoration(), // 去掉底部的跟随条
+          labelColor: Colors.green,
           tabs: const [
             Tab(icon: Icon(Icons.chat)),
             Tab(icon: Icon(Icons.calendar_month)),

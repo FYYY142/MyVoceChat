@@ -1,10 +1,10 @@
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:my_voce_chat/apis/todo_apis/todo_apis.dart';
 import 'package:my_voce_chat/types/todo_types/todo_types.dart';
 
 class TodoController extends GetxController {
   final RxBool isTreeView = true.obs;
-  final RxBool isEditViewShow = false.obs;
 
   // 任务数据
   final RxList<Task> tasks = <Task>[].obs;
@@ -177,7 +177,7 @@ class TodoController extends GetxController {
     }
   }
 
-  /// 创建新任务
+  /// 创MARK: 建新任务
   Future<bool> createTask({
     required String title,
     String? description,
@@ -200,6 +200,17 @@ class TodoController extends GetxController {
         priority: priority,
         status: status,
       );
+
+      Fluttertoast.showToast(msg: '创建成功!');
+      print({
+        'title': title,
+        'description': description,
+        'date': date,
+        'time': time,
+        'type': type,
+        'priority': priority,
+        'status': status,
+      });
 
       if (newTask != null) {
         // 添加到对应的列表中
@@ -224,7 +235,7 @@ class TodoController extends GetxController {
     }
   }
 
-  /// 更新任务
+  /// MARK: 更新任务
   Future<bool> updateTask(String taskId, Task updatedTask) async {
     isUpdating.value = true;
     errorMessage.value = '';
@@ -234,7 +245,7 @@ class TodoController extends GetxController {
 
       if (result != null) {
         // 更新本地数据
-        _updateLocalTask(result);
+        // _updateLocalTask(result);
 
         // 处理任务分组
         processTaskGroups();
@@ -251,7 +262,7 @@ class TodoController extends GetxController {
     }
   }
 
-  /// 删除任务
+  /// MARK: 删除任务
   Future<bool> deleteTask(String taskId) async {
     isDeleting.value = true;
     errorMessage.value = '';
@@ -260,6 +271,7 @@ class TodoController extends GetxController {
       final success = await TodoApi.deleteTask(taskId);
 
       if (success) {
+        Fluttertoast.showToast(msg: '删除成功');
         // 从本地列表中移除
         tasks.removeWhere((task) => task.id == taskId);
         events.removeWhere((event) => event.id == taskId);
@@ -284,7 +296,7 @@ class TodoController extends GetxController {
     }
   }
 
-  /// 更新任务状态
+  /// MARK: 更新任务状态
   Future<bool> updateTaskStatus(String taskId, String status) async {
     isUpdating.value = true;
     errorMessage.value = '';
@@ -294,7 +306,7 @@ class TodoController extends GetxController {
 
       if (result != null) {
         // 更新本地数据
-        _updateLocalTask(result);
+        // _updateLocalTask(result);
 
         // 处理任务分组
         processTaskGroups();
@@ -311,7 +323,7 @@ class TodoController extends GetxController {
     }
   }
 
-  /// 更新任务优先级
+  /// MARK: 更新任务优先级
   Future<bool> updateTaskPriority(String taskId, String priority) async {
     isUpdating.value = true;
     errorMessage.value = '';
@@ -321,7 +333,7 @@ class TodoController extends GetxController {
 
       if (result != null) {
         // 更新本地数据
-        _updateLocalTask(result);
+        // _updateLocalTask(result);
 
         // 处理任务分组
         processTaskGroups();
@@ -338,7 +350,7 @@ class TodoController extends GetxController {
     }
   }
 
-  /// 获取任务详情
+  /// MARK: 获取任务详情
   Future<Task?> getTaskDetail(String taskId) async {
     try {
       final task = await TodoApi.getTask(taskId);
@@ -367,22 +379,22 @@ class TodoController extends GetxController {
     errorMessage.value = '';
   }
 
-  /// 获取所有任务（包括任务和事件）
+  /// MARK: 获取所有任务（包括任务和事件）
   List<Task> getAllTasks() {
     return [...tasks, ...events];
   }
 
-  /// 获取待完成的任务
+  /// MARK: 获取待完成的任务
   List<Task> getPendingTasks() {
     return tasks.where((task) => task.status == 'pending').toList();
   }
 
-  /// 获取已完成的任务
+  /// MARK: 获取已完成的任务
   List<Task> getCompletedTasks() {
     return tasks.where((task) => task.status == 'completed').toList();
   }
 
-  /// 获取高优先级任务
+  /// MARK: 获取高优先级任务
   List<Task> getHighPriorityTasks() {
     return tasks.where((task) => task.priority == 'high').toList();
   }
@@ -411,7 +423,7 @@ class TodoController extends GetxController {
     }
   }
 
-  /// 刷新数据
+  /// MARK: 刷新数据
   Future<void> refreshData() async {
     if (currentStartDate.value.isNotEmpty && currentEndDate.value.isNotEmpty) {
       if (currentStartDate.value == currentEndDate.value) {
@@ -428,7 +440,7 @@ class TodoController extends GetxController {
     }
   }
 
-  /// 处理任务分组
+  /// MARK: 处理任务分组
   void processTaskGroups() {
     final allTasks = [...tasks, ...events];
 

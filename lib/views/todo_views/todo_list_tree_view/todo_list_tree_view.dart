@@ -62,9 +62,10 @@ class _TodoListTreeViewState extends State<TodoListTreeView> {
           return const Center(
               child: CircularProgressIndicator(
                   backgroundColor: Color(0xFFf1f2f6)));
-        } else if (_todoController.taskGroups.isEmpty) {
-          return const Center(child: Text('没有任务'));
-        }
+        } 
+        // else if (_todoController.taskGroups.isEmpty) {
+        //   return const Center(child: Text('没有任务'));
+        // }
         return Container(
           decoration: BoxDecoration(color: Color(0xFFf1f2f6)),
           child: Stack(

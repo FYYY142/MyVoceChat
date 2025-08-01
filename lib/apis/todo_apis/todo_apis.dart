@@ -1,8 +1,9 @@
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_voce_chat/types/todo_types/todo_types.dart';
 import 'package:my_voce_chat/utils/http_util/http_util.dart';
 
 class TodoApi {
-  static const String baseUrl = 'http://192.168.31.88:3000/api/tasks';
+  static const String baseUrl = 'https://fyyy-express.vercel.app/api/tasks';
 
   /// 获取任务/事件列表
   /// [startDate] 开始日期 (YYYY-MM-DD)
@@ -41,7 +42,10 @@ class TodoApi {
       }
       return null;
     } catch (e) {
-      print('创建任务失败: $e');
+      Fluttertoast.showToast(msg: '创建任务失败: $e');
+      print('---------------------------------------------------');
+      print(e);
+      print(task);
       return null;
     }
   }
