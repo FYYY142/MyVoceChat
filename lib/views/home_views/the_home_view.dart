@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_voce_chat/views/chat_views/chat_list_view.dart';
-import 'package:my_voce_chat/views/todo_views/calendar_view.dart';
+import 'package:my_voce_chat/views/todo_views/todo_view.dart';
 import 'package:my_voce_chat/views/mine_views/mine_view.dart';
 
 class TheHomeView extends StatefulWidget {
@@ -41,7 +41,7 @@ class _TheHomeViewState extends State<TheHomeView>
         index: _currentIndex,
         children: const [
           ChatListView(),
-          CalendarView(),
+          TodoView(),
           MineView(),
         ],
       ),
