@@ -65,3 +65,95 @@ class ChatGroup {
     };
   }
 }
+
+class ChatMessage {
+  final int createdAt;
+  final MessageDetail detail;
+  final int fromUid;
+  final int mid;
+  final MessageTarget target;
+
+  ChatMessage({
+    required this.createdAt,
+    required this.detail,
+    required this.fromUid,
+    required this.mid,
+    required this.target,
+  });
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    return ChatMessage(
+      createdAt: json['created_at'] ?? 0,
+      detail: MessageDetail.fromJson(json['detail'] ?? {}),
+      fromUid: json['from_uid'] ?? 0,
+      mid: json['mid'] ?? 0,
+      target: MessageTarget.fromJson(json['target'] ?? {}),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'created_at': createdAt,
+      'detail': detail.toJson(),
+      'from_uid': fromUid,
+      'mid': mid,
+      'target': target.toJson(),
+    };
+  }
+}
+
+class MessageDetail {
+  final String content;
+  final String contentType;
+  final int? expiresIn;
+  final Map<String, dynamic> properties;
+  final String type;
+
+  MessageDetail({
+    required this.content,
+    required this.contentType,
+    this.expiresIn,
+    required this.properties,
+    required this.type,
+  });
+
+  factory MessageDetail.fromJson(Map<String, dynamic> json) {
+    return MessageDetail(
+      content: json['content'] ?? '',
+      contentType: json['content_type'] ?? 'text/plain',
+      expiresIn: json['expires_in'],
+      properties: json['properties'] ?? {},
+      type: json['type'] ?? 'normal',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'content': content,
+      'content_type': contentType,
+      'expires_in': expiresIn,
+      'properties': properties,
+      'type': type,
+    };
+  }
+}
+
+class MessageTarget {
+  final int gid;
+
+  MessageTarget({
+    required this.gid,
+  });
+
+  factory MessageTarget.fromJson(Map<String, dynamic> json) {
+    return MessageTarget(
+      gid: json['gid'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'gid': gid,
+    };
+  }
+}

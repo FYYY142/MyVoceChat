@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:my_voce_chat/controller/chat_controllers/chat_controller.dart';
 import 'package:my_voce_chat/utils/chat_http_util/chat_http_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -38,6 +39,19 @@ class ChatUserController extends GetxController {
   Future<void> _initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
     _loadStoredUserData();
+    // 通知其他控制器token已加载完成
+    _notifyTokenLoaded();
+  }
+
+  /// 通知其他控制器token已加载完成
+  void _notifyTokenLoaded() {
+    // 如果ChatController已经初始化，通知它更新token
+    try {
+      final chatController = Get.find<ChatController>();
+      chatController.updateToken();
+    } catch (e) {
+      // ChatController还没有初始化，这是正常的
+    }
   }
 
   /// 从本地存储加载用户数据
@@ -51,6 +65,9 @@ class ChatUserController extends GetxController {
       _token.value = storedToken;
       _refreshToken.value = storedRefreshToken ?? '';
       _serverId.value = storedServerId ?? '';
+
+      // 为网络请求设置 token
+      ChatHttpUtil.to.setToken(storedToken);
 
       try {
         final userMap = jsonDecode(storedUserJson);
@@ -142,6 +159,9 @@ class ChatUserController extends GetxController {
     _currentUser.value = UserInfo.fromJson(data['user']);
     _isLoggedIn.value = true;
 
+    // 为网络请求设置 token
+    ChatHttpUtil.to.setToken(_token.value);
+
     // 保存到本地存储
     await _prefs.setString('access_token', _token.value);
     await _prefs.setString('refresh_token', _refreshToken.value);
@@ -157,6 +177,8 @@ class ChatUserController extends GetxController {
     _serverId.value = '';
     _currentUser.value = null;
     _isLoggedIn.value = false;
+
+    await ChatUserApi.logout();
 
     await _clearStoredData();
 
@@ -175,11 +197,48 @@ class ChatUserController extends GetxController {
     await _prefs.remove('user_info');
   }
 
-  /// 获取完整的认证头
-  Map<String, String> getAuthHeaders() {
-    return {
-      'Authorization': 'Bearer $_token',
-      'X-Server-ID': _serverId.value,
-    };
+  /// 刷新Token
+  Future<bool> toRefreshToken() async {
+    if (_token.value.isEmpty || _refreshToken.value.isEmpty) {
+      print('Token或RefreshToken为空，无法刷新');
+      return false;
+    }
+
+    try {
+      _isLoading.value = true;
+
+      final data = await ChatUserApi.renewToken(
+        token: _token.value,
+        refreshToken: _refreshToken.value,
+      );
+
+      if (data != null) {
+        // 更新token信息
+        _token.value = data['token'] ?? '';
+        _refreshToken.value = data['refresh_token'] ?? '';
+
+        // 保存到本地存储
+        await _prefs.setString('access_token', _token.value);
+        await _prefs.setString('refresh_token', _refreshToken.value);
+
+        print('Token刷新成功');
+        return true;
+      } else {
+        print('Token刷新失败，服务器返回空数据');
+        return false;
+      }
+    } catch (e) {
+      print('Token刷新失败: ${e.toString()}');
+      return false;
+    } finally {
+      _isLoading.value = false;
+    }
+  }
+
+  /// 自动刷新Token（当token即将过期时调用）
+  Future<bool> autoRefreshTokenIfNeeded() async {
+    // 这里可以添加token过期时间检查逻辑
+    // 如果token即将过期，自动调用refreshToken()
+    return await toRefreshToken();
   }
 }

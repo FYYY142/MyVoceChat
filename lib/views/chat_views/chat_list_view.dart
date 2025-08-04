@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:my_voce_chat/controller/chat_controllers/chat_user_controller.dart';
 import 'package:my_voce_chat/controller/chat_controllers/chat_controller.dart';
-import 'package:my_voce_chat/utils/alert_util/alert_util.dart';
-import 'package:my_voce_chat/utils/http_util/http_util.dart';
 
 class ChatListView extends StatefulWidget {
   const ChatListView({super.key});
@@ -70,7 +67,11 @@ class _ChatListViewState extends State<ChatListView> {
                             ))),
                     onTap: () {
                       // 退出按钮点击事件
-                      Get.toNamed('/chatLogin');
+                      if (_chatUserController.isLoggedIn) {
+                        _chatUserController.logout();
+                      } else {
+                        Get.toNamed('/chatLogin');
+                      }
                     },
                   ),
                 ],
@@ -96,6 +97,7 @@ class _ChatListViewState extends State<ChatListView> {
             itemCount: _chatController.groups.length,
             itemBuilder: (context, index) {
               final group = _chatController.groups[index];
+
               return ListTile(
                 leading: CircleAvatar(
                   backgroundColor: Colors.green,
@@ -124,7 +126,7 @@ class _ChatListViewState extends State<ChatListView> {
                 ),
                 onTap: () {
                   // 点击群组进入聊天
-                  print('进入群组: ${group.name}');
+                  Get.toNamed('/chatRoom/${group.gid}');
                 },
               );
             },

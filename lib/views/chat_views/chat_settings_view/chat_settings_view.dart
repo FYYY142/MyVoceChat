@@ -132,7 +132,28 @@ class _ChatSettingsViewState extends State<ChatSettingsView> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 10),
+              // 刷新Token按钮
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    final success = await _chatUserController.toRefreshToken();
+                    if (success) {
+                      Fluttertoast.showToast(msg: 'Token刷新成功');
+                    } else {
+                      Fluttertoast.showToast(msg: 'Token刷新失败');
+                    }
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('刷新Token'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ],

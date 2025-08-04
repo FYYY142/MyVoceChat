@@ -10,8 +10,8 @@ class ChatLoginView extends StatefulWidget {
 }
 
 class _ChatLoginViewState extends State<ChatLoginView> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController(text: '123456@qq.com');
+  final _passwordController = TextEditingController(text: '123456');
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoginMode = true;

@@ -7,6 +7,7 @@ import 'package:my_voce_chat/controller/chat_controllers/chat_controller.dart';
 import 'package:my_voce_chat/controller/todo_controllers/todo_controller.dart';
 import 'package:my_voce_chat/controller/chat_controllers/chat_user_controller.dart';
 import 'package:my_voce_chat/views/chat_views/chat_login_view/chat_login_view.dart';
+import 'package:my_voce_chat/views/chat_views/chat_room_view/chat_room_view.dart';
 import 'package:my_voce_chat/views/chat_views/chat_settings_view/chat_settings_view.dart';
 import 'package:my_voce_chat/views/home_views/the_home_view.dart';
 import 'package:my_voce_chat/views/mine_views/newwork_view/newwork_settings_view.dart';
@@ -48,11 +49,18 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: TheHomeView(),
       ),
-      routes: {
-        '/network': (context) => NetworkSettingsView(),
-        '/chatLogin': (context) => ChatLoginView(),
-        '/chatSettings': (context) => ChatSettingsView(),
-      },
+      getPages: [
+        GetPage(name: '/network', page: () => NetworkSettingsView()),
+        GetPage(name: '/chatLogin', page: () => ChatLoginView()),
+        GetPage(name: '/chatSettings', page: () => ChatSettingsView()),
+        GetPage(
+            name: '/chatRoom/:groupId',
+            page: () {
+              final groupId =
+                  int.tryParse(Get.parameters['groupId'] ?? '1') ?? 1;
+              return ChatRoomView(groupId: groupId);
+            }),
+      ],
     );
   }
 }

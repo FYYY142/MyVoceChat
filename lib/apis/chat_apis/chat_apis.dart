@@ -10,4 +10,10 @@ class ChatApis {
     final List<dynamic> data = response.data;
     return data.map((json) => ChatGroup.fromJson(json)).toList();
   }
+
+  static Future<List<ChatMessage>> getGroupHistory(int groupId) async {
+    final response = await _httpUtil.get('$_baseUrl/group/$groupId/history');
+    final List<dynamic> data = response.data;
+    return data.map((json) => ChatMessage.fromJson(json)).toList();
+  }
 }

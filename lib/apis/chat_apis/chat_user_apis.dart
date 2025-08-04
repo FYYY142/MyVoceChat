@@ -1,4 +1,4 @@
-import '../../utils/http_util/http_util.dart';
+import 'package:my_voce_chat/utils/chat_http_util/chat_http_util.dart';
 
 /// 聊天用户相关API
 class ChatUserApi {
@@ -15,7 +15,7 @@ class ChatUserApi {
     required String password,
   }) async {
     try {
-      final response = await HttpUtil.to.post(
+      final response = await ChatHttpUtil.to.post(
         '$_baseUrl/token/login',
         data: {
           'credential': {
@@ -45,7 +45,7 @@ class ChatUserApi {
     required String password,
   }) async {
     try {
-      final response = await HttpUtil.to.post(
+      final response = await ChatHttpUtil.to.post(
         '$_baseUrl/user/register',
         data: {
           'magic_token': _magicToken,
@@ -59,6 +59,45 @@ class ChatUserApi {
         return response.data as Map<String, dynamic>;
       }
       return null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// 刷新Token
+  /// [token] 当前访问token
+  /// [refreshToken] 刷新token
+  /// 返回新的token信息
+  static Future<Map<String, dynamic>?> renewToken({
+    required String token,
+    required String refreshToken,
+  }) async {
+    try {
+      final response = await ChatHttpUtil.to.post(
+        '$_baseUrl/token/renew',
+        data: {
+          'token': token,
+          'refresh_token': refreshToken,
+        },
+        showErrorDialog: false,
+      );
+
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// 退出登录
+  /// 返回是否成功退出
+  static Future<bool> logout() async {
+    try {
+      final response = await ChatHttpUtil.to.get('$_baseUrl/token/logout');
+
+      return response.statusCode == 200;
     } catch (e) {
       rethrow;
     }
