@@ -41,12 +41,7 @@ class _BuildEditFormState extends State<BuildEditForm> {
     'high': '高',
   };
 
-  final Map<String, String> _statusMap = {
-    'pending': '待处理',
-    'in_progress': '进行中',
-    'completed': '已完成',
-    'overdue': '已逾期',
-  };
+  final Map<String, String> _statusMap = {'pending': '待处理', 'completed': '已完成'};
 
   @override
   void initState() {
@@ -86,40 +81,32 @@ class _BuildEditFormState extends State<BuildEditForm> {
       final formattedTime =
           "${_selectedTime.hour.toString().padLeft(2, '0')}:${_selectedTime.minute.toString().padLeft(2, '0')}";
 
-      final task = Task(
-        // 根据 isEdit 和 widget.task 是否存在来决定 id
-        id: widget.isEdit && widget.task != null // 如果是编辑模式且 widget.task 不为空
-            ? widget.task!.id // 使用现有任务的 id
-            : DateTime.now().millisecondsSinceEpoch.toString(), // 否则生成新的 id
-        title: _titleController.text,
-        description: _descController.text,
-        date: formattedDate,
-        time: formattedTime,
-        type: _type,
-        priority: _priority,
-        status: _status,
-        // 根据 isEdit 和 widget.task 是否存在来决定 createdAt
-        createdAt:
-            widget.isEdit && widget.task != null // 如果是编辑模式且 widget.task 不为空
-                ? widget.task!.createdAt // 使用现有任务的 createdAt
-                : DateTime.now().toIso8601String(), // 否则生成新的 createdAt
-        updatedAt: DateTime.now().toIso8601String(),
-      );
-
-      if (widget.isEdit) {
-        _todoController.updateTask(task.id, task);
+      if (widget.isEdit && widget.task != null) {
+        // 编辑模式：只传需要更新的字段
+        final updateData = <String, dynamic>{
+          'title': _titleController.text,
+          'description': _descController.text,
+          'date': formattedDate,
+          'time': formattedTime,
+          'type': _type,
+          'priority': _priority,
+          'status': _status,
+        };
+        _todoController.updateTask(widget.task!.id, updateData);
       } else {
+        // 创建模式
         _todoController.createTask(
-            title: task.title,
-            description: task.description,
-            date: task.date,
-            time: task.time,
-            type: task.type,
-            priority: task.priority,
-            status: task.status);
+          title: _titleController.text,
+          description: _descController.text,
+          date: formattedDate,
+          time: formattedTime,
+          type: _type,
+          priority: _priority,
+          status: _status,
+        );
       }
 
-      Navigator.pop(context, task);
+      Navigator.pop(context);
     }
   }
 
@@ -156,7 +143,7 @@ class _BuildEditFormState extends State<BuildEditForm> {
               _buildCupertinoPickerTile(
                   '状态',
                   _statusMap[_status] ?? _status,
-                  ['pending', 'in_progress', 'completed', 'overdue'],
+                  ['pending', 'completed'],
                   (val) => setState(() => _status = val)),
               const SizedBox(height: 30), // 增加底部按钮的间距
               Padding(

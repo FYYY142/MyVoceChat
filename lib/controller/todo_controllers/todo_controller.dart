@@ -32,13 +32,14 @@ class TodoController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // 初始化时加载当前月份的任务
     loadCurrentMonthTasks();
   }
 
   void toggleView(int index) {
     isTreeView.value = index == 0;
   }
+
+  // MARK: - 数据加载方法
 
   /// 加载当前月份的任务
   Future<void> loadCurrentMonthTasks() async {
@@ -49,28 +50,13 @@ class TodoController extends GetxController {
       final now = DateTime.now();
       final taskList = await TodoApi.getTasksByMonth(now.year, now.month);
 
-      // 分离任务和事件
-      tasks.clear();
-      events.clear();
-
-      for (final task in taskList) {
-        if (task.type == 'task') {
-          tasks.add(task);
-        } else if (task.type == 'event') {
-          events.add(task);
-        }
-      }
-
-      // 更新日期范围
-      currentStartDate.value =
-          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-01';
-      currentEndDate.value =
-          '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-31';
-
-      // 处理任务分组
+      _separateTasksAndEvents(taskList);
+      _updateDateRange(now.year, now.month);
       processTaskGroups();
+      Fluttertoast.showToast(msg: '任务加载成功');
     } catch (e) {
       errorMessage.value = '加载任务失败: $e';
+      Fluttertoast.showToast(msg: '加载任务失败: $e');
     } finally {
       isLoading.value = false;
     }
@@ -83,29 +69,13 @@ class TodoController extends GetxController {
 
     try {
       final taskList = await TodoApi.getTasksByMonth(year, month);
-
-      // 分离任务和事件
-      tasks.clear();
-      events.clear();
-
-      for (final task in taskList) {
-        if (task.type == 'task') {
-          tasks.add(task);
-        } else if (task.type == 'event') {
-          events.add(task);
-        }
-      }
-
-      // 更新日期范围
-      currentStartDate.value =
-          '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-01';
-      currentEndDate.value =
-          '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-31';
-
-      // 处理任务分组
+      _separateTasksAndEvents(taskList);
+      _updateDateRange(year, month);
       processTaskGroups();
+      Fluttertoast.showToast(msg: '${year}年${month}月任务加载成功');
     } catch (e) {
       errorMessage.value = '加载任务失败: $e';
+      Fluttertoast.showToast(msg: '加载任务失败: $e');
     } finally {
       isLoading.value = false;
     }
@@ -118,66 +88,40 @@ class TodoController extends GetxController {
 
     try {
       final taskList = await TodoApi.getTasksByDate(date);
-
-      // 分离任务和事件
-      tasks.clear();
-      events.clear();
-
-      for (final task in taskList) {
-        if (task.type == 'task') {
-          tasks.add(task);
-        } else if (task.type == 'event') {
-          events.add(task);
-        }
-      }
-
-      // 更新日期范围
+      _separateTasksAndEvents(taskList);
       currentStartDate.value = date;
       currentEndDate.value = date;
-
-      // 处理任务分组
       processTaskGroups();
+      Fluttertoast.showToast(msg: '$date 任务加载成功');
     } catch (e) {
       errorMessage.value = '加载任务失败: $e';
+      Fluttertoast.showToast(msg: '加载任务失败: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// MARK: 加载所有任务（不限制时间范围）
+  /// 加载所有任务
   Future<void> loadAllTasks() async {
     isLoading.value = true;
     errorMessage.value = '';
 
     try {
       final taskList = await TodoApi.getTaskList();
-
-      // 分离任务和事件
-      tasks.clear();
-      events.clear();
-
-      for (final task in taskList) {
-        if (task.type == 'task') {
-          tasks.add(task);
-        } else if (task.type == 'event') {
-          events.add(task);
-        }
-      }
-
-      // 清空日期范围，表示显示所有任务
+      _separateTasksAndEvents(taskList);
       currentStartDate.value = '';
       currentEndDate.value = '';
-
-      // 处理任务分组
       processTaskGroups();
+      Fluttertoast.showToast(msg: '所有任务加载成功');
     } catch (e) {
       errorMessage.value = '加载任务失败: $e';
+      Fluttertoast.showToast(msg: '加载任务失败: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// 创MARK: 建新任务
+  /// MARK: 创建新任务
   Future<bool> createTask({
     required String title,
     String? description,
@@ -201,33 +145,23 @@ class TodoController extends GetxController {
         status: status,
       );
 
-      Fluttertoast.showToast(msg: '创建成功!');
-      print({
-        'title': title,
-        'description': description,
-        'date': date,
-        'time': time,
-        'type': type,
-        'priority': priority,
-        'status': status,
-      });
-
       if (newTask != null) {
-        // 添加到对应的列表中
+        Fluttertoast.showToast(msg: '创建成功!');
+        // 直接插入到本地状态
         if (newTask.type == 'task') {
           tasks.add(newTask);
         } else if (newTask.type == 'event') {
           events.add(newTask);
         }
-
-        // 处理任务分组
         processTaskGroups();
         return true;
       } else {
+        Fluttertoast.showToast(msg: '创建任务失败');
         errorMessage.value = '创建任务失败';
         return false;
       }
     } catch (e) {
+      Fluttertoast.showToast(msg: '创建任务失败');
       errorMessage.value = '创建任务失败: $e';
       return false;
     } finally {
@@ -236,26 +170,34 @@ class TodoController extends GetxController {
   }
 
   /// MARK: 更新任务
-  Future<bool> updateTask(String taskId, Task updatedTask) async {
+  Future<bool> updateTask(String taskId, Map<String, dynamic> data) async {
     isUpdating.value = true;
     errorMessage.value = '';
 
     try {
-      final result = await TodoApi.updateTask(taskId, updatedTask);
-
+      final result = await TodoApi.updateTask(taskId, data);
       if (result != null) {
-        // 更新本地数据
-        // _updateLocalTask(result);
+        Fluttertoast.showToast(msg: '任务更新成功');
+        // 直接替换本地状态中的任务
+        tasks.removeWhere((task) => task.id == result.id);
+        events.removeWhere((event) => event.id == result.id);
 
-        // 处理任务分组
+        if (result.type == 'task') {
+          tasks.add(result);
+        } else if (result.type == 'event') {
+          events.add(result);
+        }
+
         processTaskGroups();
         return true;
       } else {
         errorMessage.value = '更新任务失败';
+        Fluttertoast.showToast(msg: '更新任务失败');
         return false;
       }
     } catch (e) {
       errorMessage.value = '更新任务失败: $e';
+      Fluttertoast.showToast(msg: '更新任务失败: $e');
       return false;
     } finally {
       isUpdating.value = false;
@@ -269,10 +211,9 @@ class TodoController extends GetxController {
 
     try {
       final success = await TodoApi.deleteTask(taskId);
-
       if (success) {
         Fluttertoast.showToast(msg: '删除成功');
-        // 从本地列表中移除
+        // 直接从本地列表移除
         tasks.removeWhere((task) => task.id == taskId);
         events.removeWhere((event) => event.id == taskId);
 
@@ -281,7 +222,6 @@ class TodoController extends GetxController {
           selectedTask.value = null;
         }
 
-        // 处理任务分组
         processTaskGroups();
         return true;
       } else {
@@ -296,73 +236,25 @@ class TodoController extends GetxController {
     }
   }
 
-  /// MARK: 更新任务状态
-  Future<bool> updateTaskStatus(String taskId, String status) async {
-    isUpdating.value = true;
-    errorMessage.value = '';
-
-    try {
-      final result = await TodoApi.updateTaskStatus(taskId, status);
-
-      if (result != null) {
-        // 更新本地数据
-        // _updateLocalTask(result);
-
-        // 处理任务分组
-        processTaskGroups();
-        return true;
-      } else {
-        errorMessage.value = '更新任务状态失败';
-        return false;
-      }
-    } catch (e) {
-      errorMessage.value = '更新任务状态失败: $e';
-      return false;
-    } finally {
-      isUpdating.value = false;
-    }
-  }
-
-  /// MARK: 更新任务优先级
-  Future<bool> updateTaskPriority(String taskId, String priority) async {
-    isUpdating.value = true;
-    errorMessage.value = '';
-
-    try {
-      final result = await TodoApi.updateTaskPriority(taskId, priority);
-
-      if (result != null) {
-        // 更新本地数据
-        // _updateLocalTask(result);
-
-        // 处理任务分组
-        processTaskGroups();
-        return true;
-      } else {
-        errorMessage.value = '更新任务优先级失败';
-        return false;
-      }
-    } catch (e) {
-      errorMessage.value = '更新任务优先级失败: $e';
-      return false;
-    } finally {
-      isUpdating.value = false;
-    }
-  }
-
-  /// MARK: 获取任务详情
+  /// 获取任务详情
   Future<Task?> getTaskDetail(String taskId) async {
     try {
       final task = await TodoApi.getTask(taskId);
       if (task != null) {
         selectedTask.value = task;
+        Fluttertoast.showToast(msg: '任务详情加载成功');
+      } else {
+        Fluttertoast.showToast(msg: '任务不存在');
       }
       return task;
     } catch (e) {
       errorMessage.value = '获取任务详情失败: $e';
+      Fluttertoast.showToast(msg: '获取任务详情失败: $e');
       return null;
     }
   }
+
+  // MARK: - 任务选择和状态管理
 
   /// 选择任务
   void selectTask(Task task) {
@@ -379,72 +271,60 @@ class TodoController extends GetxController {
     errorMessage.value = '';
   }
 
-  /// MARK: 获取所有任务（包括任务和事件）
+  // MARK: - 数据查询方法
+
+  /// 获取所有任务（包括任务和事件）
   List<Task> getAllTasks() {
     return [...tasks, ...events];
   }
 
-  /// MARK: 获取待完成的任务
+  /// 获取待完成的任务
   List<Task> getPendingTasks() {
     return tasks.where((task) => task.status == 'pending').toList();
   }
 
-  /// MARK: 获取已完成的任务
+  /// 获取已完成的任务
   List<Task> getCompletedTasks() {
     return tasks.where((task) => task.status == 'completed').toList();
   }
 
-  /// MARK: 获取高优先级任务
+  /// 获取高优先级任务
   List<Task> getHighPriorityTasks() {
     return tasks.where((task) => task.priority == 'high').toList();
   }
 
-  /// 检查是否显示所有任务（通过检查日期范围是否为空）
+  /// 检查是否显示所有任务
   bool get isShowingAllTasks {
     return currentStartDate.value.isEmpty && currentEndDate.value.isEmpty;
   }
 
-  /// 更新本地任务数据
-  void _updateLocalTask(Task updatedTask) {
-    // 从原列表中移除
-    tasks.removeWhere((task) => task.id == updatedTask.id);
-    events.removeWhere((event) => event.id == updatedTask.id);
+  // MARK: - 数据处理和工具方法
 
-    // 添加到对应的新列表中
-    if (updatedTask.type == 'task') {
-      tasks.add(updatedTask);
-    } else if (updatedTask.type == 'event') {
-      events.add(updatedTask);
-    }
-
-    // 如果更新的是当前选中的任务，更新选中状态
-    if (selectedTask.value?.id == updatedTask.id) {
-      selectedTask.value = updatedTask;
-    }
-  }
-
-  /// MARK: 刷新数据
+  /// 刷新数据
   Future<void> refreshData() async {
-    if (currentStartDate.value.isNotEmpty && currentEndDate.value.isNotEmpty) {
-      if (currentStartDate.value == currentEndDate.value) {
-        // 如果是同一天，加载指定日期的任务
-        await loadTasksByDate(currentStartDate.value);
+    try {
+      if (currentStartDate.value.isNotEmpty &&
+          currentEndDate.value.isNotEmpty) {
+        if (currentStartDate.value == currentEndDate.value) {
+          await loadTasksByDate(currentStartDate.value);
+        } else {
+          final startDate = DateTime.parse(currentStartDate.value);
+          await loadTasksByMonth(startDate.year, startDate.month);
+        }
       } else {
-        // 否则加载日期范围的任务
-        final startDate = DateTime.parse(currentStartDate.value);
-        await loadTasksByMonth(startDate.year, startDate.month);
+        await loadCurrentMonthTasks();
       }
-    } else {
-      // 默认加载当前月份
-      await loadCurrentMonthTasks();
+      Fluttertoast.showToast(msg: '数据刷新成功');
+    } catch (e) {
+      Fluttertoast.showToast(msg: '数据刷新失败: $e');
     }
   }
 
-  /// MARK: 处理任务分组
+  // MARK: - 私有辅助方法
+
+  /// 处理任务分组
   void processTaskGroups() {
     final allTasks = [...tasks, ...events];
-
-    // 按日期分组
     final Map<String, List<Task>> groupedTasks = {};
 
     for (final task in allTasks) {
@@ -455,7 +335,6 @@ class TodoController extends GetxController {
       groupedTasks[date]!.add(task);
     }
 
-    // 转换为 TaskGroup 列表并按日期排序
     final groups = groupedTasks.entries.map((entry) {
       return TaskGroup(
         date: entry.key,
@@ -463,9 +342,29 @@ class TodoController extends GetxController {
       );
     }).toList();
 
-    // 按日期排序（最新的在前）
     groups.sort((a, b) => b.date.compareTo(a.date));
-
     taskGroups.assignAll(groups);
+  }
+
+  /// 分离任务和事件
+  void _separateTasksAndEvents(List<Task> taskList) {
+    tasks.clear();
+    events.clear();
+
+    for (final task in taskList) {
+      if (task.type == 'task') {
+        tasks.add(task);
+      } else if (task.type == 'event') {
+        events.add(task);
+      }
+    }
+  }
+
+  /// 更新日期范围
+  void _updateDateRange(int year, int month) {
+    currentStartDate.value =
+        '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-01';
+    currentEndDate.value =
+        '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-31';
   }
 }

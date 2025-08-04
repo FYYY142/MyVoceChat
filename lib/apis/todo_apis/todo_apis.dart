@@ -51,11 +51,12 @@ class TodoApi {
   }
 
   /// 更新任务/事件
-  static Future<Task?> updateTask(String taskId, Task task) async {
+  static Future<Task?> updateTask(
+      String taskId, Map<String, dynamic> data) async {
     try {
       final response = await HttpUtil.to.put(
         '$baseUrl/$taskId',
-        data: task.toUpdateJson(),
+        data: data,
       );
 
       if (response.data['success'] == true && response.data['data'] != null) {
@@ -63,7 +64,6 @@ class TodoApi {
       }
       return null;
     } catch (e) {
-      print('更新任务失败: $e');
       return null;
     }
   }
@@ -119,50 +119,29 @@ class TodoApi {
     String? priority,
     String? status,
   }) async {
-    final task = Task(
-      id: '', // 创建时不需要ID
-      title: title,
-      description: description,
-      date: date,
-      time: time,
-      type: type,
-      priority: priority,
-      status: status,
-      createdAt: '',
-      updatedAt: '',
-    );
+    try {
+      final data = <String, dynamic>{
+        'title': title,
+        'date': date,
+        'type': type,
+      };
 
-    return createTask(task);
-  }
+      if (description != null) data['description'] = description;
+      if (time != null) data['time'] = time;
+      if (type == 'task') {
+        data['priority'] = priority ?? 'medium';
+        data['status'] = status ?? 'pending';
+      }
 
-  /// 更新任务状态
-  static Future<Task?> updateTaskStatus(String taskId, String status) async {
-    final task = Task(
-      id: taskId,
-      title: '',
-      date: '',
-      type: 'task',
-      status: status,
-      createdAt: '',
-      updatedAt: '',
-    );
+      final response = await HttpUtil.to.post(baseUrl, data: data);
 
-    return updateTask(taskId, task);
-  }
-
-  /// 更新任务优先级
-  static Future<Task?> updateTaskPriority(
-      String taskId, String priority) async {
-    final task = Task(
-      id: taskId,
-      title: '',
-      date: '',
-      type: 'task',
-      priority: priority,
-      createdAt: '',
-      updatedAt: '',
-    );
-
-    return updateTask(taskId, task);
+      if (response.data['success'] == true && response.data['data'] != null) {
+        return Task.fromJson(response.data['data']);
+      }
+      return null;
+    } catch (e) {
+      Fluttertoast.showToast(msg: '创建任务失败: $e');
+      return null;
+    }
   }
 }

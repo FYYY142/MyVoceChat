@@ -219,7 +219,5 @@ Color _getStatusColor(String status) {
 // 如果想显示更友好状态文本喵，也可以加映射
 const Map<String, String> _statusTextMap = {
   'completed': '已完成',
-  'pending': '待处理',
-  'overdue': '已逾期',
-  'in_progress': '进行中',
+  'pending': '待处理'
 };

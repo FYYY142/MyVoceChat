@@ -174,10 +174,6 @@ Color _getStatusColor(String status) {
       return Colors.green;
     case 'pending':
       return Colors.blue;
-    case 'overdue':
-      return Colors.red;
-    case 'in_progress':
-      return Colors.orange;
     default:
       return Colors.grey;
   }
@@ -187,6 +183,4 @@ Color _getStatusColor(String status) {
 const Map<String, String> _statusTextMap = {
   'completed': '已完成',
   'pending': '待处理',
-  'overdue': '已逾期',
-  'in_progress': '进行中',
 };

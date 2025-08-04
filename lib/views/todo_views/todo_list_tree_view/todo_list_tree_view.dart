@@ -33,13 +33,17 @@ class _TodoListTreeViewState extends State<TodoListTreeView> {
                 color: Colors.black87, // 更柔和的黑色
               ),
             ),
+            const SizedBox(
+              width: 10,
+            ),
             Obx(() => _todoController.isUpdating.value
                 ? const SizedBox(
                     width: 16,
                     height: 16,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
+                      strokeWidth: 3,
                       backgroundColor: Color(0xFFf1f2f6),
+                      color: Colors.green,
                     ),
                   )
                 : const SizedBox.shrink()),
