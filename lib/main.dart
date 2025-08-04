@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:my_voce_chat/controller/todo_controllers/todo_controller.dart';
 import 'package:my_voce_chat/views/home_views/the_home_view.dart';
+import 'package:my_voce_chat/views/mine_views/newwork_view/newwork_settings_view.dart';
 
 void main() {
   // 注册Dio实例
@@ -19,10 +20,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       home: Scaffold(
         body: TheHomeView(),
       ),
+      routes: {
+        '/network': (context) => NetworkSettingsView(),
+      },
     );
   }
 }
