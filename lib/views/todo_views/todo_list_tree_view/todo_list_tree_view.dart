@@ -24,12 +24,26 @@ class _TodoListTreeViewState extends State<TodoListTreeView> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          '我的任务',
-          style: TextStyle(
-            fontWeight: FontWeight.w600, // 稍微不那么粗
-            color: Colors.black87, // 更柔和的黑色
-          ),
+        title: Row(
+          children: [
+            const Text(
+              '我的任务',
+              style: TextStyle(
+                fontWeight: FontWeight.w600, // 稍微不那么粗
+                color: Colors.black87, // 更柔和的黑色
+              ),
+            ),
+            Obx(() => _todoController.isUpdating.value
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      backgroundColor: Color(0xFFf1f2f6),
+                    ),
+                  )
+                : const SizedBox.shrink()),
+          ],
         ),
         backgroundColor: Colors.white, // 扁平化设计，白色背景
         elevation: 0, // 完全移除阴影
@@ -62,7 +76,7 @@ class _TodoListTreeViewState extends State<TodoListTreeView> {
           return const Center(
               child: CircularProgressIndicator(
                   backgroundColor: Color(0xFFf1f2f6)));
-        } 
+        }
         // else if (_todoController.taskGroups.isEmpty) {
         //   return const Center(child: Text('没有任务'));
         // }
