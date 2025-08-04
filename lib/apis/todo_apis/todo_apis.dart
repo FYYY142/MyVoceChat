@@ -1,6 +1,7 @@
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:my_voce_chat/types/todo_types/todo_types.dart';
 import 'package:my_voce_chat/utils/http_util/http_util.dart';
+import 'package:my_voce_chat/utils/alert_util/alert_util.dart';
 
 class TodoApi {
   static const String baseUrl = 'https://fyyy-express.vercel.app/api/tasks';
@@ -12,21 +13,29 @@ class TodoApi {
     String? startDate,
     String? endDate,
   }) async {
-    final queryParams = <String, String>{};
-    if (startDate != null) queryParams['start_date'] = startDate;
-    if (endDate != null) queryParams['end_date'] = endDate;
+    try {
+      final queryParams = <String, String>{};
+      if (startDate != null) queryParams['start_date'] = startDate;
+      if (endDate != null) queryParams['end_date'] = endDate;
 
-    final response = await HttpUtil.to.get(
-      baseUrl,
-      params: queryParams.isNotEmpty ? queryParams : null,
-    );
+      final response = await HttpUtil.to.get(
+        baseUrl,
+        params: queryParams.isNotEmpty ? queryParams : null,
+      );
 
-    if (response.data is List) {
-      return (response.data as List)
-          .map((e) => Task.fromJson(e as Map<String, dynamic>))
-          .toList();
+      if (response.data is List) {
+        return (response.data as List)
+            .map((e) => Task.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      AlertUtil.showErrorDialog(
+        message: '获取任务列表失败：$e',
+        title: '网络请求错误',
+      );
+      return [];
     }
-    return [];
   }
 
   /// 创建任务/事件
@@ -42,10 +51,10 @@ class TodoApi {
       }
       return null;
     } catch (e) {
-      Fluttertoast.showToast(msg: '创建任务失败: $e');
-      print('---------------------------------------------------');
-      print(e);
-      print(task);
+      AlertUtil.showErrorDialog(
+        message: '创建任务失败：$e\n\n任务信息：${task.toString()}',
+        title: '创建任务错误',
+      );
       return null;
     }
   }
@@ -64,6 +73,10 @@ class TodoApi {
       }
       return null;
     } catch (e) {
+      AlertUtil.showErrorDialog(
+        message: '更新任务失败：$e\n\n任务ID：$taskId\n更新数据：${data.toString()}',
+        title: '更新任务错误',
+      );
       return null;
     }
   }
@@ -74,7 +87,10 @@ class TodoApi {
       final response = await HttpUtil.to.delete('$baseUrl/$taskId');
       return response.data['success'] == true;
     } catch (e) {
-      print('删除任务失败: $e');
+      AlertUtil.showErrorDialog(
+        message: '删除任务失败：$e\n\n任务ID：$taskId',
+        title: '删除任务错误',
+      );
       return false;
     }
   }
@@ -89,7 +105,10 @@ class TodoApi {
       }
       return null;
     } catch (e) {
-      print('获取任务失败: $e');
+      AlertUtil.showErrorDialog(
+        message: '获取任务详情失败：$e\n\n任务ID：$taskId',
+        title: '获取任务错误',
+      );
       return null;
     }
   }
@@ -140,7 +159,10 @@ class TodoApi {
       }
       return null;
     } catch (e) {
-      Fluttertoast.showToast(msg: '创建任务失败: $e');
+      AlertUtil.showErrorDialog(
+        message: '创建任务失败：$e\n\n任务标题：$title\n日期：$date',
+        title: '创建任务错误',
+      );
       return null;
     }
   }

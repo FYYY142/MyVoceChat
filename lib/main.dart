@@ -3,17 +3,26 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:my_voce_chat/controller/chat_controllers/chat_controller.dart';
 import 'package:my_voce_chat/controller/todo_controllers/todo_controller.dart';
+import 'package:my_voce_chat/controller/chat_controllers/chat_user_controller.dart';
+import 'package:my_voce_chat/views/chat_views/chat_login_view/chat_login_view.dart';
+import 'package:my_voce_chat/views/chat_views/chat_settings_view/chat_settings_view.dart';
 import 'package:my_voce_chat/views/home_views/the_home_view.dart';
 import 'package:my_voce_chat/views/mine_views/newwork_view/newwork_settings_view.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // 注册Dio实例
   Get.put(Dio());
 
-  // 注册TodoController
+  // 注册Controllers
   Get.put(TodoController());
-  initializeDateFormatting().then((_) => runApp(MyApp()));
+  Get.put(ChatUserController());
+  Get.put(ChatController());
+
+  initializeDateFormatting().then((_) => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -41,6 +50,8 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         '/network': (context) => NetworkSettingsView(),
+        '/chatLogin': (context) => ChatLoginView(),
+        '/chatSettings': (context) => ChatSettingsView(),
       },
     );
   }
