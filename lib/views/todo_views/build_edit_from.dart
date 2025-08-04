@@ -29,6 +29,25 @@ class _BuildEditFormState extends State<BuildEditForm> {
 
   final TodoController _todoController = Get.find<TodoController>();
 
+  // 中文映射
+  final Map<String, String> _typeMap = {
+    'task': '任务',
+    'event': '事件',
+  };
+
+  final Map<String, String> _priorityMap = {
+    'low': '低',
+    'medium': '中',
+    'high': '高',
+  };
+
+  final Map<String, String> _statusMap = {
+    'pending': '待处理',
+    'in_progress': '进行中',
+    'completed': '已完成',
+    'overdue': '已逾期',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -127,16 +146,16 @@ class _BuildEditFormState extends State<BuildEditForm> {
               _buildCupertinoDateSelectionTile(),
               _buildCupertinoTimeSelectionTile(),
               const SizedBox(height: 16),
-              _buildCupertinoPickerTile('类型', _type, ['task', 'event'],
-                  (val) => setState(() => _type = val)),
+              _buildCupertinoPickerTile('类型', _typeMap[_type] ?? _type,
+                  ['task', 'event'], (val) => setState(() => _type = val)),
               _buildCupertinoPickerTile(
                   '优先级',
-                  _priority,
+                  _priorityMap[_priority] ?? _priority,
                   ['low', 'medium', 'high'],
                   (val) => setState(() => _priority = val)),
               _buildCupertinoPickerTile(
                   '状态',
-                  _status,
+                  _statusMap[_status] ?? _status,
                   ['pending', 'in_progress', 'completed', 'overdue'],
                   (val) => setState(() => _status = val)),
               const SizedBox(height: 30), // 增加底部按钮的间距
@@ -380,6 +399,16 @@ class _BuildEditFormState extends State<BuildEditForm> {
       selectedIndex = 0; // Fallback to first option if current value not found
     }
 
+    // 根据标题选择对应的映射
+    Map<String, String> displayMap = {};
+    if (title == '类型') {
+      displayMap = _typeMap;
+    } else if (title == '优先级') {
+      displayMap = _priorityMap;
+    } else if (title == '状态') {
+      displayMap = _statusMap;
+    }
+
     showCupertinoModalPopup(
       context: context,
       builder: (BuildContext context) {
@@ -387,7 +416,7 @@ class _BuildEditFormState extends State<BuildEditForm> {
           title: Text(title),
           actions: options.map((option) {
             return CupertinoActionSheetAction(
-              child: Text(option),
+              child: Text(displayMap[option] ?? option),
               onPressed: () {
                 onChanged(option);
                 Navigator.pop(context);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -20,6 +21,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 隐藏状态栏与底部导航
+    SystemChrome.setEnabledSystemUIMode(
+      // 配合 SystemUiOverlayStyle 的 systemNavigationBarColor: Colors.transparent，可达到底部系统导航透明效果；
+      // 如果系统导航是3按钮导航，那么可以设置 systemNavigationBarContrastEnforced： false，取消默认的半透明效果。
+      // 全屏展示
+      SystemUiMode.edgeToEdge,
+      //默认隐藏，若从边缘滑动会显示，过会儿会自动隐藏（安卓，iOS）
+      //  SystemUiMode.immersiveSticky,
+      //默认隐藏，若从边缘滑动会显示，不自动隐藏（安卓）
+      //  SystemUiMode.immersive,
+      //默认隐藏，点击屏幕任一地方都后会显示，不自动隐藏（安卓，不过在 pixel4 上测试无效）
+      //SystemUiMode.leanBack,
+    );
+
     return GetMaterialApp(
       home: Scaffold(
         body: TheHomeView(),
