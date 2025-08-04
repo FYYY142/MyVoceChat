@@ -27,7 +27,7 @@ class _ChatListViewState extends State<ChatListView> {
         backgroundColor: Colors.white,
         title: const Text('Voce Chat'),
         actions: [
-          const Text('枫亦有忆',
+          Text(_chatUserController.currentUser?.name ?? '游客',
               style:
                   TextStyle(fontWeight: FontWeight.w500, color: Colors.black)),
           const SizedBox(width: 10),
@@ -107,23 +107,57 @@ class _ChatListViewState extends State<ChatListView> {
                   ),
                 ),
                 title: Text(group.name),
-                subtitle: Text(
-                  group.description ?? '${group.members.length} 成员',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                trailing: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (group.isPublic)
-                      const Icon(Icons.public, size: 16, color: Colors.green),
-                    const SizedBox(height: 4),
-                    Text(
-                      'ID: ${group.gid}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                subtitle: Obx(() {
+                  final formattedMessage = _chatController
+                      .getFormattedLatestMessagePreview(group.gid);
+                  final fallbackText =
+                      group.description ?? '${group.members.length} 成员';
+
+                  return Text(
+                    formattedMessage.isNotEmpty
+                        ? formattedMessage
+                        : fallbackText,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: formattedMessage.isNotEmpty
+                          ? Colors.black87
+                          : Colors.grey,
+                      fontSize: formattedMessage.isNotEmpty ? 14 : 13,
                     ),
-                  ],
-                ),
+                  );
+                }),
+                trailing: Obx(() {
+                  final latestTime =
+                      _chatController.getLatestMessageTime(group.gid);
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (latestTime.isNotEmpty)
+                        Text(
+                          latestTime,
+                          style:
+                              const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (group.isPublic)
+                            const Icon(Icons.public,
+                                size: 14, color: Colors.green),
+                          if (group.isPublic) const SizedBox(width: 4),
+                          Text(
+                            '${group.gid}',
+                            style: const TextStyle(
+                                fontSize: 10, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                }),
                 onTap: () {
                   // 点击群组进入聊天
                   Get.toNamed('/chatRoom/${group.gid}');

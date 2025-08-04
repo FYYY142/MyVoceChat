@@ -171,6 +171,14 @@ class ChatUserController extends GetxController {
 
   /// 登出
   Future<void> logout() async {
+    try {
+      // 先调用服务器登出API（此时token还存在）
+      await ChatUserApi.logout();
+    } catch (e) {
+      print('服务器登出失败: $e');
+      // 即使服务器登出失败，也继续清理本地数据
+    }
+
     // 清理本地数据
     _token.value = '';
     _refreshToken.value = '';
@@ -178,7 +186,8 @@ class ChatUserController extends GetxController {
     _currentUser.value = null;
     _isLoggedIn.value = false;
 
-    await ChatUserApi.logout();
+    // 清除HTTP工具中的token
+    ChatHttpUtil.to.setToken('');
 
     await _clearStoredData();
 
@@ -220,6 +229,7 @@ class ChatUserController extends GetxController {
         // 保存到本地存储
         await _prefs.setString('access_token', _token.value);
         await _prefs.setString('refresh_token', _refreshToken.value);
+        ChatHttpUtil.to.setToken(_token.value);
 
         print('Token刷新成功');
         return true;

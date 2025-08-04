@@ -91,7 +91,8 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              if (_chatController.messages.isEmpty) {
+              final currentMessages = _chatController.getCurrentGroupMessages();
+              if (currentMessages.isEmpty) {
                 return const Center(
                   child: Text(
                     '暂无消息',
@@ -110,9 +111,9 @@ class _ChatRoomViewState extends State<ChatRoomView> {
                 child: ListView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(16),
-                  itemCount: _chatController.messages.length,
+                  itemCount: currentMessages.length,
                   itemBuilder: (context, index) {
-                    final message = _chatController.messages[index];
+                    final message = currentMessages[index];
                     return _buildMessageItem(message);
                   },
                 ),

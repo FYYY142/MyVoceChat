@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:my_voce_chat/utils/chat_http_util/chat_http_util.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_voce_chat/controller/chat_controllers/chat_controller.dart';
 import 'package:my_voce_chat/controller/todo_controllers/todo_controller.dart';
 import 'package:my_voce_chat/controller/chat_controllers/chat_user_controller.dart';
@@ -11,6 +14,22 @@ import 'package:my_voce_chat/views/chat_views/chat_room_view/chat_room_view.dart
 import 'package:my_voce_chat/views/chat_views/chat_settings_view/chat_settings_view.dart';
 import 'package:my_voce_chat/views/home_views/the_home_view.dart';
 import 'package:my_voce_chat/views/mine_views/newwork_view/newwork_settings_view.dart';
+
+late SharedPreferences _prefs;
+
+Future<void> _initializeToken() async {
+  _prefs = await SharedPreferences.getInstance();
+
+  final storedToken = _prefs.getString('access_token');
+
+  // 可以在这里处理获取到的token，比如设置到全局状态或者验证token有效性
+  if (storedToken != null) {
+    // 处理已存在的token
+    print('Found stored token: $storedToken');
+    // Fluttertoast.showToast(msg: storedToken);
+    ChatHttpUtil.to.setToken(storedToken);
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +41,9 @@ void main() async {
   Get.put(TodoController());
   Get.put(ChatUserController());
   Get.put(ChatController());
+
+  // 初始化token
+  await _initializeToken();
 
   initializeDateFormatting().then((_) => runApp(const MyApp()));
 }
